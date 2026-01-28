@@ -46,29 +46,30 @@ void* parallel_quicksort(void* arg) {
     int high = data->high;
 
     if (low < high) {
-
         int pivot = partition(arr, low, high);
+        if (high - low > 100){
 
-        
-         pthread_t thread;
+            pthread_t thread;
+                    
+            ThreadArgs* left_args = malloc(sizeof(ThreadArgs)); //arguments for smaller array
+            left_args->arr = arr;
+            left_args->low = low;
+            left_args->high = pivot - 1;
+
+            pthread_create(&thread, NULL, parallel_quicksort, left_args); // start threading left
+
+            ThreadArgs right_args = {arr, pivot + 1, high}; // bigger array side args
+            parallel_quicksort(&right_args); // parent process 
+
+            pthread_join(thread, NULL); // join both threads
+            free(left_args); // free memory we allocated
             
-        ThreadArgs* left_args = malloc(sizeof(ThreadArgs)); //arguments for smaller array
-        left_args->arr = arr;
-        left_args->low = low;
-        left_args->high = pivot - 1;
-
-    
-        pthread_create(&thread, NULL, parallel_quicksort, left_args); // start threading left
-
-
-        ThreadArgs right_args = {arr, pivot + 1, high}; // bigger array side args
-        parallel_quicksort(&right_args); // parent process 
-
-    
-        pthread_join(thread, NULL); // join both threads
-        free(left_args); // free memory we allocated
-        
-    }
-    return NULL;
+        }
+        else{ // sort sequentially
+            ThreadArgs left_args = {arr, low, pivot - 1};
+            ThreadArgs right_args = {arr, pivot + 1, high};
+            parallel_quicksort(&left_args);
+            parallel_quicksort(&right_args);
+        }
+        return NULL;
 }
-
