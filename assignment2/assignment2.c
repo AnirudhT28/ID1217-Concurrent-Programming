@@ -37,3 +37,38 @@ int partition(int *arr, int low, int high) {
     // Return the index where the pivot now sits
     return (i + 1);
 }
+
+void* parallel_quicksort(void* arg) {
+
+    ThreadArgs* data = (ThreadArgs*)arg; //unpack struct
+    int *arr = data->arr;
+    int low = data->low;
+    int high = data->high;
+
+    if (low < high) {
+
+        int pi = partition(arr, low, high);
+
+        
+         pthread_t thread;
+            
+        ThreadArgs* left_args = malloc(sizeof(ThreadArgs)); //arguments for smaller array
+        left_args->arr = arr;
+        left_args->low = low;
+        left_args->high = pi - 1;
+
+    
+        pthread_create(&thread, NULL, parallel_quicksort, left_args); // start threading left
+
+
+        ThreadArgs right_args = {arr, pi + 1, high}; // bigger array side args
+        parallel_quicksort(&right_args); // parent process 
+
+    
+        pthread_join(thread, NULL); // join both threads
+        free(left_args); // free memory we allocated
+        
+    }
+    return NULL;
+}
+
