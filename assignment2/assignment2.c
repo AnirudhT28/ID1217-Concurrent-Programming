@@ -109,8 +109,7 @@ int main(int argc, char *argv[]) {
     ThreadArgs args = {arr, 0, n - 1};
     parallel_quicksort(&args); //sort
 
-    // 6. Stop timing
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, NULL); //stop timer
     double time_taken = (end.tv_sec - start.tv_sec) + 
                         (end.tv_usec - start.tv_usec) / 1e6;
 
