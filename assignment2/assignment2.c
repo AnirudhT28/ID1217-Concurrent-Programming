@@ -47,7 +47,7 @@ void* parallel_quicksort(void* arg) {
 
     if (low < high) {
 
-        int pi = partition(arr, low, high);
+        int pivot = partition(arr, low, high);
 
         
          pthread_t thread;
@@ -55,13 +55,13 @@ void* parallel_quicksort(void* arg) {
         ThreadArgs* left_args = malloc(sizeof(ThreadArgs)); //arguments for smaller array
         left_args->arr = arr;
         left_args->low = low;
-        left_args->high = pi - 1;
+        left_args->high = pivot - 1;
 
     
         pthread_create(&thread, NULL, parallel_quicksort, left_args); // start threading left
 
 
-        ThreadArgs right_args = {arr, pi + 1, high}; // bigger array side args
+        ThreadArgs right_args = {arr, pivot + 1, high}; // bigger array side args
         parallel_quicksort(&right_args); // parent process 
 
     
