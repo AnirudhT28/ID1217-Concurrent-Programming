@@ -52,7 +52,7 @@ void* parallel_quicksort(void* arg) {
         int pivot = partition(arr, low, high);
 
 
-        if (high - low > 100){
+        if (high - low > 1000){
 
             pthread_t thread;
                     
