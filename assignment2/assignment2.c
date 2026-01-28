@@ -46,7 +46,12 @@ void* parallel_quicksort(void* arg) {
     int high = data->high;
 
     if (low < high) {
+
+
+
         int pivot = partition(arr, low, high);
+
+
         if (high - low > 100){
 
             pthread_t thread;
@@ -56,20 +61,62 @@ void* parallel_quicksort(void* arg) {
             left_args->low = low;
             left_args->high = pivot - 1;
 
+            
             pthread_create(&thread, NULL, parallel_quicksort, left_args); // start threading left
+
 
             ThreadArgs right_args = {arr, pivot + 1, high}; // bigger array side args
             parallel_quicksort(&right_args); // parent process 
 
+            
             pthread_join(thread, NULL); // join both threads
             free(left_args); // free memory we allocated
             
         }
         else{ // sort sequentially
+
             ThreadArgs left_args = {arr, low, pivot - 1};
             ThreadArgs right_args = {arr, pivot + 1, high};
             parallel_quicksort(&left_args);
             parallel_quicksort(&right_args);
         }
-        return NULL;
+    }
+    return NULL;
+}
+
+int main(int argc, char *argv[]) {
+   
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <number_of_elements>\n", argv[0]);
+        return 1;
+    }
+    int n = atoi(argv[1]);
+   
+    int *arr = malloc(n * sizeof(int)); //allocate array on the heap
+    if (arr == NULL) {
+        perror("Failed to allocate memory");
+        return 1;
+    }
+
+    srand(time(NULL)); //seed srand and fill array
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % (2 * n); // Random numbers between 0 - 2n
+    }
+
+    struct timeval start, end; // start timing
+    gettimeofday(&start, NULL);
+
+    ThreadArgs args = {arr, 0, n - 1};
+    parallel_quicksort(&args); //sort
+
+    // 6. Stop timing
+    gettimeofday(&end, NULL);
+    double time_taken = (end.tv_sec - start.tv_sec) + 
+                        (end.tv_usec - start.tv_usec) / 1e6;
+
+    printf("Sorted in %f seconds.\n", time_taken);
+
+    // Clean up
+    free(arr);
+    return 0;
 }
